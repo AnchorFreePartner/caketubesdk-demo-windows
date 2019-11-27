@@ -3,6 +3,7 @@
 ## Description
 Windows SDK is a part of Anchorfree Partner SDK which contains the client-side libraries and server-side applications needed to implement custom VPN infrastructure.
 
+
 Download [the last version SDK](https://firebasestorage.googleapis.com/v0/b/web-portal-for-partners.appspot.com/o/products%2FCakeTubeSDK_Win_version_1.3.1.187_partnerapi_1.0.2.38%20_with_TAP_signed.zip?alt=media&token=603f6991-bee1-4d3f-b994-c2a3947a0f1b)
 
 The Windows SDK provides API allowing:
@@ -38,7 +39,7 @@ Performs initialization of SDK
 | -------|:-----------:|
 | VpnConnectionService | The service for connect/disconnect operations. |
 | VpnWindowsServiceHandler | The handler that allows to interact with Windows service., check its state and etc. |
-| VpnServerService | The service that allows to perform backend related requests. |
+| BackendService | The service that allows to perform backend related requests. |
 
 
 #### Example
@@ -63,15 +64,21 @@ Recommended place to create this service is an Application singleton class.
 #### Methods
 | Syntax | Description |
 | -------|:-----------:|
-| static IVpnServerService Create() | Creates VpnServerService instance. |
-| Task< VpnLogoutResponse > LogoutAsync(LogoutRequestParams) | Performs logout on server side. |
-| Task< VpnIsConnectedResponse > IsConnectedAsync() | Checks if VPN connection is established. |
-| Task< UserConfigResponse > GetConfigAsync() | Gets configuration data from server. |
-| Task< VpnCountersResponse > GetTrafficCountersAsync(GetCountersRequestParams) | Gets incoming and outcoming vpn traffic from the server. |
-| Task< VpnLoginResponce > LoginAsync(VpnLoginParams) | Logs in to vpn server. |
-| Task< VpnCountriesResponse > GetCountriesAsync(string) | Gets available vpn countries. Requires access token as parameter. |
-| Task< VpnVerifyCredentialsResponse > VerifyCredentialsAsync(VerifyCredentialsParams) | Cheks if received credentials are still valid. |
-| Task< VpnCredentialsResponce > GetCredentialsAsync(GetCredentialsParams) | Gets credentials for establishing vpn connection. |
+| Task< LoginResponse > LoginAsync(LoginParams) | Logs in to vpn server. |
+| Task< LogoutResponse > LogoutAsync(LogoutParams) | Performs logout on server side. |
+| Task< IsVpnResponse > IsVpnAsync() | Checks if VPN connection is established. |
+| Task< VerifyResponse > VerifyAsync(VerifyParams) | Cheks if received credentials are still valid. |
+| Task< ConfigResponse > ConfigAsync() | Gets configuration data from server. |
+| Task< CredentialsResponse > CredentialsAsync(CredentialsParams) | Gets credentials for establishing vpn connection. |
+| Task< NodesResponse > NodesAsync(NodesParams) | Gets available vpn countries. Requires access token as parameter. |
+| Task< VpnCountersResponse > CountersAsync(GetCountersRequestParams) | Gets incoming and outcoming vpn traffic from the server. |
+| Task< RemainingTrafficResponse > RemainingTrafficAsync(RemainingTrafficParams) | Gets remaining traffic for the current user. |
+| Task< PurchaseResponse > PurchaseAsync(PurchaseParams)| Performs a purchase on the backend. |
+| Task< CurrentResponse > CurrentAsync(CurrentParams)| Gets current user info. |
+| Task< RemoteConfigResponse > RemoteConfigAsync(RemoteConfigParams) | Gets remote config for an app. Hydra only |
+| Task< ProvideResponse > ProvideAsync(ProvideParams) | Gets credentials for establishing vpn connection for several servers. Hydra only |
+| Task< BypassDomainsResponse > BypassDomainsAsync(BypassDomainsParams) | Gets a list of domains that will be bypassed. Hydra ONLY |
+| Task< NetworkRulesResponse > NetworkRulesAsync(NetworkRulesParams)| Gets . Hydra ONLY |
 
 ## Connection
 
@@ -84,8 +91,7 @@ Recommended place to create this service is an Application singleton class. This
 #### Methods
 | Syntax | Description |
 | -------|:-----------:|
-| static IVpnConnectionService Create() | Creates VpnConnectionService instance. |
-| Task< bool > ConnectAsync(VpnCredentials) | Opens Vpn connection. |
+| Task< bool > ConnectAsync(CredentialsResponse) | Opens Vpn connection. |
 | void Disconnect() | Closes VPN connection. |
 
 
@@ -99,6 +105,8 @@ Recommended place to create this service is an Application singleton class. This
 | -------|:-----------:|
 | VpnConnectionStateChangedEventHandler VpnStateChanged | Notifies subscribers about Vpn Connection state changes. |
 | VpnTrafficChangedEventHandler VpnTrafficChanged | Notifies subscribers about changes of consumed network traffic value |
+| VpnTrafficLimitReached VpnTrafficLimitReached | Notifies subscribers when traffic limit reached |
+
 
 
 ## Logging
