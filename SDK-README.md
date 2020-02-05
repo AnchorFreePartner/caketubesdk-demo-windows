@@ -4,7 +4,7 @@
 Windows SDK is a part of Anchorfree Partner SDK which contains the client-side libraries and server-side applications needed to implement custom VPN infrastructure.
 
 
-Download [the last version SDK](https://firebasestorage.googleapis.com/v0/b/web-portal-for-partners.appspot.com/o/products%2FCakeTubeSDK_Win_version_1.3.1.187_partnerapi_1.0.2.40%20_with_TAP_signed.zip?alt=media&token=f08e6354-6f40-4e01-8593-a9880e5f0633)
+Download [the last version SDK](https://firebasestorage.googleapis.com/v0/b/web-portal-for-partners.appspot.com/o/products%2FCakeTubeSDK_Win_version_1.3.3.217_partnerapi_1.0.2.42%20_with_TAP_signed.zip?alt=media&token=69dd6f1d-4836-4ab0-ae30-fd116e168f71)
 
 The Windows SDK provides API allowing:
 * authenticate clients on VPN Server
