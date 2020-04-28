@@ -56,7 +56,7 @@ Steps to implement OAuth:
 * Implement client OAuth for your application.
 * Retrieve access token in client app, this token will be used to initialize and sign in Windows Partner SDK.
 
-### VpnServerService Class
+### BackendService Class
 
 Manages client user: authentication, credentials retrieval, user info.
 Recommended place to create this service is an Application singleton class.
@@ -78,7 +78,11 @@ Recommended place to create this service is an Application singleton class.
 | Task< RemoteConfigResponse > RemoteConfigAsync(RemoteConfigParams) | Gets remote config for an app. Hydra only |
 | Task< ProvideResponse > ProvideAsync(ProvideParams) | Gets credentials for establishing vpn connection for several servers. Hydra only |
 | Task< BypassDomainsResponse > BypassDomainsAsync(BypassDomainsParams) | Gets a list of domains that will be bypassed. Hydra ONLY |
-| Task< NetworkRulesResponse > NetworkRulesAsync(NetworkRulesParams)| Gets . Hydra ONLY |
+| Task< NetworkRulesResponse > NetworkRulesAsync(NetworkRulesParams)| Experimental. Hydra ONLY |
+
+You can initialize it directly or  call a static property CakeTube.BackendService.
+
+
 
 ## Connection
 
