@@ -80,7 +80,7 @@ Recommended place to create this service is an Application singleton class.
 | Task< BypassDomainsResponse > BypassDomainsAsync(BypassDomainsParams) | Gets a list of domains that will be bypassed. Hydra ONLY |
 | Task< NetworkRulesResponse > NetworkRulesAsync(NetworkRulesParams)| Experimental. Hydra ONLY |
 
-You can initialize it directly or  call a static property CakeTube.BackendService.
+You can initialize it directly or call a static property CakeTube.BackendService.
 
 
 
