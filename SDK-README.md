@@ -19,8 +19,8 @@ Nuget dependencies:
 ## Setup
 In order to use the SDK the steps described below must be performed.
 1. Install TAP Driver as Administrator via command line: ./tapinstall.exe install "AFTap.inf" "aftap0901"
-2. Install VPN Windows Service as Administrator via command line: ./VpnService.exe -install ServiceName
-3. To uninstall service later: ./VpnService.exe -uninstall ServiceName
+2. Install VPN Windows Service as Administrator via command line: ./VpnService.exe -install "Your Service Name"
+3. To uninstall service later: ./VpnService.exe -uninstall "Your Service Name"
 
 ## Initialize
 ### CakeTube Class
