@@ -1,8 +1,7 @@
 ﻿namespace CakeTubeSdk.Demo.Logger
 {
     using System;
-
-    using CakeTubeSdk.Core.Infrastructure;
+    using CakeTubeSdk.Windows.Infrastructure;
 
     /// <summary>
     /// Event-based logger listener.

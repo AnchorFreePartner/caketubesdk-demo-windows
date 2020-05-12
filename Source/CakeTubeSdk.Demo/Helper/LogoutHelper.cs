@@ -1,11 +1,9 @@
 ﻿namespace CakeTubeSdk.Demo.Helper
 {
+    using System;
     using System.Threading.Tasks;
-
-    using CakeTubeSdk.Core;
-    using CakeTubeSdk.Core.ApiParameters;
-    using CakeTubeSdk.Core.Services;
-    using CakeTubeSdk.Windows;
+    using PartnerApi;
+    using PartnerApi.Parameters;
 
     /// <summary>
     /// Logout related properties and methods.
@@ -18,6 +16,11 @@
         public static string AccessToken { private get; set; }
 
         /// <summary>
+        /// Access token to perform logout with.
+        /// </summary>
+        public static string BackendUrl { private get; set; }
+
+        /// <summary>
         /// Performs logout from backend.
         /// </summary>
         public static async Task Logout()
@@ -25,10 +28,10 @@
             try
             {
                 // Resolve backend service
-                var partnerBackendService = CakeTube.VpnServerService;
-
+                var partnerBackendService = new BackendService(new Uri(BackendUrl));
+                var logoutParams = new LogoutParams(AccessToken);
                 // Logout from backend
-                await partnerBackendService.LogoutAsync(new LogoutRequestParams { AccessToken = AccessToken });
+                await partnerBackendService.LogoutAsync(logoutParams);
             }
             catch
             {

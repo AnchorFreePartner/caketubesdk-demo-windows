@@ -38,9 +38,6 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CakeTubeSdk.Core">
-      <HintPath>..\..\SDK\CakeTubeSdk.Core.dll</HintPath>
-    </Reference>
     <Reference Include="CakeTubeSdk.Windows">
       <HintPath>..\..\SDK\CakeTubeSdk.Windows.dll</HintPath>
     </Reference>
@@ -58,6 +55,9 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PartnerApi">
+      <HintPath>..\..\SDK\PartnerApi.dll</HintPath>
     </Reference>
     <Reference Include="Prism, Version=6.3.0.0, Culture=neutral, PublicKeyToken=40ee6c3a2184dc59, processorArchitecture=MSIL">
       <HintPath>..\packages\Prism.Core.6.3.0\lib\net45\Prism.dll</HintPath>

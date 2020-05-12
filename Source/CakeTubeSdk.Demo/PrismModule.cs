@@ -1,6 +1,5 @@
 ﻿namespace CakeTubeSdk.Demo
 {
-    using CakeTubeSdk.Core.Services;
     using CakeTubeSdk.Demo.Control;
     using CakeTubeSdk.Windows;
 

@@ -3,22 +3,20 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
     using System.Windows.Threading;
-
-    using CakeTubeSdk.Core.ApiParameters;
-    using CakeTubeSdk.Core.Infrastructure;
-    using CakeTubeSdk.Core.Services;
-    using CakeTubeSdk.Core.Vpn;
     using CakeTubeSdk.Demo.Helper;
     using CakeTubeSdk.Demo.Logger;
     using CakeTubeSdk.Windows;
+    using CakeTubeSdk.Windows.Infrastructure;
     using CakeTubeSdk.Windows.Vpn;
-
+    using PartnerApi;
+    using PartnerApi.Misc;
+    using PartnerApi.Model.Nodes;
+    using PartnerApi.Parameters;
     using Prism.Commands;
     using Prism.Mvvm;
 
@@ -35,7 +33,7 @@
         /// <summary>
         /// CakeTube VPN server service instance.
         /// </summary>
-        private VpnServerService vpnServerService;
+        private IBackendService vpnServerService;
 
         /// <summary>
         /// CakeTube VPN connection service instance.
@@ -576,8 +574,8 @@
                 var isGithub = this.UseGithubAuthorization;
 
                 var vpnAuthenticationMethod = isGithub
-                            ? VpnAuthenticationMethod.GitHub
-                            : VpnAuthenticationMethod.Anonymous;
+                            ? AuthenticationMethod.GitHub
+                            : AuthenticationMethod.Anonymous;
 
                 var authAccessToken = isGithub ? await GitHubHelper.GetGithubOAuthToken(this.GitHubLogin, passwordBoxValue) : string.Empty;
 
@@ -589,14 +587,13 @@
                 }
 
                 // Perform login
-                var loginResponse = await this.vpnServerService.LoginAsync(
-                                        new VpnLoginParams
-                                            {
-                                                AuthenticationMethod = vpnAuthenticationMethod,
-                                                DeviceId = this.DeviceId,                                                
-                                                OAuthAccessToken = authAccessToken,
-                                                DeviceName = Environment.MachineName
-                                            });
+                var loginParams = new LoginParams(
+                    this.CarrierId,
+                    this.DeviceId,
+                    Environment.MachineName,
+                    vpnAuthenticationMethod,
+                    authAccessToken);
+                var loginResponse = await this.vpnServerService.LoginAsync(loginParams).ConfigureAwait(false);
 
                 // Check whether login was successful
                 if (!loginResponse.IsSuccess)
@@ -609,6 +606,7 @@
 
                 // Remember access token for later usages
                 LogoutHelper.AccessToken = loginResponse.AccessToken;
+                LogoutHelper.BackendUrl = this.BackendUrl;
                 this.AccessToken = loginResponse.AccessToken;
 
                 this.UpdateCountries();
@@ -636,12 +634,9 @@
             try
             {
                 // Get available countries
-                var countriesResponse = await this.vpnServerService.GetCountriesAsync(
-                                            new GetCountriesParams
-                                                {
-                                                    AccessToken = this.AccessToken,
-                                                    Type = VpnProtocolType.OpenVpnUdp
-                                                });
+                var carrier = new Carrier(this.CarrierId, string.Empty, this.AccessToken);
+                var nodesParams = new NodesParams(carrier, ProtocolType.OpenVpnUdp);
+                var countriesResponse = await this.vpnServerService.NodesAsync(nodesParams);
 
                 // Check whether request was successful
                 if (!countriesResponse.IsSuccess)
@@ -653,7 +648,7 @@
                 }
 
                 // Get countries from response
-                var countries = countriesResponse.VpnCountries.Select(x => x.Country).ToList();
+                var countries = countriesResponse.VpnCountries.Select(x => x.CountryCode).ToList();
                 countries.Insert(0, string.Empty);
 
                 // Remember countries
@@ -678,8 +673,9 @@
                 this.IsLoggedIn = false;
 
                 // Perform logout
+                var logoutParams = new LogoutParams(this.AccessToken);
                 var logoutResponse =
-                    await this.vpnServerService.LogoutAsync(new LogoutRequestParams { AccessToken = this.AccessToken });
+                    await this.vpnServerService.LogoutAsync(logoutParams);
 
                 // Check whether logout was successful
                 if (!logoutResponse.IsSuccess)
@@ -826,7 +822,7 @@
         {
             CakeTube.Initialize(this.ServiceName, this.CarrierId, this.BackendUrl);
             
-            this.vpnServerService = CakeTube.VpnServerService;
+            this.vpnServerService = new BackendService(new Uri(this.BackendUrl));
             this.vpnConnectionService = CakeTube.VpnConnectionService;
             this.vpnWindowsServiceHandler = CakeTube.VpnWindowsServiceHandler;
 
@@ -851,13 +847,11 @@
                 this.IsDisconnectButtonVisible = false;
                 this.IsLoginButtonVisible = false;
                 this.IsCountryDropdownAvailable = false;
-                var credentialsParams = new GetCredentialsParams
-                            {
-                                AccessToken = this.AccessToken,
-                                VpnType = VpnProtocolType.OpenVpnUdp,
-                                WithCertificate = false,
-                                CountryCode = this.Country
-                            };
+                var credentialsParams = new CredentialsParams(this.AccessToken, ProtocolType.OpenVpnUdp)
+                {
+                    WithCertificate = false,
+                    Country = this.Country,
+                };
 
                 var connectionResult = await this.Connect(credentialsParams);                
 
@@ -866,7 +860,12 @@
                     return;
                 }
 
-                credentialsParams.VpnType = VpnProtocolType.OpenVpnTcp;
+                credentialsParams = new CredentialsParams(this.AccessToken, ProtocolType.OpenVpnTcp)
+                {
+                    WithCertificate = false,
+                    Country = this.Country,
+                };
+
                 await this.Connect(credentialsParams);                
             }
             catch (Exception e)
@@ -881,27 +880,17 @@
             }
         }
 
-        private async Task<bool> Connect(GetCredentialsParams credentialsParams)
+        private async Task<bool> Connect(CredentialsParams credentialsParams)
         {
-            var vpnCredentialsResponse = await this.vpnServerService.GetCredentialsAsync(credentialsParams);
+            var vpnCredentialsResponse = await this.vpnServerService.CredentialsAsync(credentialsParams);
 
             if (!vpnCredentialsResponse.IsSuccess)
             {
                 throw new Exception(vpnCredentialsResponse.Error);
             }
 
-            var vpnCredentials = vpnCredentialsResponse.VpnCredentials;
-
-            return await this.vpnConnectionService.ConnectAsync(
-                                       new VpnCredentials
-                                           {
-                                               Country = this.Country ?? string.Empty,
-                                               Password = vpnCredentials.Password,
-                                               Ip = vpnCredentials.Ip,
-                                               Port = vpnCredentials.Port,
-                                               Protocol = vpnCredentials.Protocol,
-                                               UserName = vpnCredentials.UserName
-                                           });
+            var connectResponse = await this.vpnConnectionService.ConnectAsync(vpnCredentialsResponse).ConfigureAwait(false);
+            return connectResponse;
         }
 
         /// <summary>
@@ -954,9 +943,9 @@
                 }
 
                 // Get remaining traffic
+                var remainingTrafficParams = new RemainingTrafficParams(this.AccessToken);
                 var remainingTrafficResponseResult =
-                    await this.vpnServerService.GetRemainingTrafficAsync(
-                        new GetRemaningTrafficParams { AccessToken = this.AccessToken });
+                    await this.vpnServerService.RemainingTrafficAsync(remainingTrafficParams);
 
                 // Check whether request was successful
                 if (!remainingTrafficResponseResult.IsSuccess)

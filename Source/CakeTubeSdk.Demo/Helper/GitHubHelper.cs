@@ -7,9 +7,8 @@
     using System.Text;
     using System.Threading.Tasks;
 
-    using CakeTubeSdk.Core.Infrastructure;
     using CakeTubeSdk.Demo.View;
-
+    using CakeTubeSdk.Windows.Infrastructure;
     using Microsoft.Practices.ServiceLocation;
 
     using Newtonsoft.Json;
