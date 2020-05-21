@@ -58,7 +58,10 @@ namespace CakeTubeSdk.Demo.View
             await LogoutHelper.Logout().ConfigureAwait(false);
 
             // Shutdown application
-            Application.Current.Shutdown();
+            this.Dispatcher.Invoke(() =>
+            {
+                Application.Current.Shutdown();
+            });
         }
     }
 }

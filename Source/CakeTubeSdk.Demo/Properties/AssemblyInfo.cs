@@ -17,7 +17,7 @@ using System.Windows;
 [assembly: AssemblyCopyright("Copyright © 2018 AnchorFree Inc.")]
 [assembly: NeutralResourcesLanguage("en")]
 [assembly: AssemblyTrademark("")]
-[assembly: ComVisible(true)]
+[assembly: ComVisible(false)]
 [assembly: ThemeInfo(ResourceDictionaryLocation.None, ResourceDictionaryLocation.SourceAssembly)]
 
 [assembly: AssemblyVersion("1.0.23.23")]

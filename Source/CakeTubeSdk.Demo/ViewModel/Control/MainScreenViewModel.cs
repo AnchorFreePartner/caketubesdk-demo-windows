@@ -548,6 +548,7 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
                 this.VpnIp = string.Empty;
                 this.Password = string.Empty;
                 this.RemainingTrafficResponse = string.Empty;
+                this.SelectedNodeModel = null;
 
                 // Work with UI
                 this.SetStatusLoggedOut();
