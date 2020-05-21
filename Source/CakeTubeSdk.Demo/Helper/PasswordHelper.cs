@@ -1,4 +1,9 @@
-﻿namespace CakeTubeSdk.Demo.Helper
+﻿// <copyright file="PasswordHelper.cs" company="AnchorFree Inc.">
+// Copyright (c) AnchorFree Inc. All rights reserved.
+// </copyright>
+// <summary>Describes a  Password Helper.</summary>
+
+namespace CakeTubeSdk.Demo.Helper
 {
     using System.Windows;
     using System.Windows.Controls;
@@ -42,7 +47,8 @@
             dp.SetValue(IsUpdatingProperty, value);
         }
 
-        private static void OnPasswordPropertyChanged(DependencyObject sender,
+        private static void OnPasswordPropertyChanged(
+            DependencyObject sender,
             DependencyPropertyChangedEventArgs e)
         {
             var passwordBox = sender as PasswordBox;
@@ -56,7 +62,8 @@
             passwordBox.PasswordChanged += PasswordChanged;
         }
 
-        private static void Attach(DependencyObject sender,
+        private static void Attach(
+            DependencyObject sender,
             DependencyPropertyChangedEventArgs e)
         {
             PasswordBox passwordBox = sender as PasswordBox;

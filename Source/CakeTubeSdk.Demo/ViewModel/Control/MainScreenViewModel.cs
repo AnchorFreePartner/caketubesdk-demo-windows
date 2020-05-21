@@ -1,24 +1,31 @@
-﻿namespace CakeTubeSdk.Demo.ViewModel.Control
+﻿// <copyright file="MainScreenViewModel.cs" company="AnchorFree Inc.">
+// Copyright (c) AnchorFree Inc. All rights reserved.
+// </copyright>
+// <summary>Describes a MainScreenViewModel.</summary>
+
+namespace CakeTubeSdk.Demo.ViewModel.Control
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
     using System.Windows;
     using System.Windows.Controls;
     using System.Windows.Input;
     using System.Windows.Threading;
-
-    using CakeTubeSdk.Core.ApiParameters;
-    using CakeTubeSdk.Core.Infrastructure;
-    using CakeTubeSdk.Core.Services;
-    using CakeTubeSdk.Core.Vpn;
+    using CakeTubeSdk.Demo.Countries;
     using CakeTubeSdk.Demo.Helper;
     using CakeTubeSdk.Demo.Logger;
+    using CakeTubeSdk.Demo.Model;
+    using CakeTubeSdk.Demo.Properties;
     using CakeTubeSdk.Windows;
+    using CakeTubeSdk.Windows.Infrastructure;
     using CakeTubeSdk.Windows.Vpn;
-
+    using PartnerApi;
+    using PartnerApi.Misc;
+    using PartnerApi.Model.Nodes;
+    using PartnerApi.Parameters;
     using Prism.Commands;
     using Prism.Mvvm;
 
@@ -27,203 +34,54 @@
     /// </summary>
     public class MainScreenViewModel : BindableBase
     {
-        /// <summary>
-        /// Machine GUID from registry.
-        /// </summary>
-        private static readonly string MachineId;
-
-        /// <summary>
-        /// CakeTube VPN server service instance.
-        /// </summary>
-        private VpnServerService vpnServerService;
-
-        /// <summary>
-        /// CakeTube VPN connection service instance.
-        /// </summary>
-        private VpnConnectionService vpnConnectionService;
-
-        private VpnWindowsServiceHandler vpnWindowsServiceHandler;
-
-        /// <summary>
-        /// Device id for backend login method.
-        /// </summary>
-        private string deviceId;
-
-        /// <summary>
-        /// Carrier id for backend service.
-        /// </summary>
-        private string carrierId;
-
-        /// <summary>
-        /// Backend url for backend service.
-        /// </summary>
-        private string backendUrl;
-
-        /// <summary>
-        /// Country for backend get credentials method.
-        /// </summary>
-        private string country;
-
-        /// <summary>
-        /// Message which is displayed in case of errors.
-        /// </summary>
-        private string errorText;
-
-        /// <summary>
-        /// Access token for backend methods.
-        /// </summary>
-        private string accessToken;
-
-        /// <summary>
-        /// User password for VPN.
-        /// </summary>
-        private string password;
-
-        /// <summary>
-        /// VPN service IP address.
-        /// </summary>
-        private string vpnIpServerServer;
-
-        /// <summary>
-        /// VPN service IP address.
-        /// </summary>
-        private string vpnIp;
-
-        /// <summary>
-        /// Received bytes count.
-        /// </summary>
-        private string bytesReceived;
-
-        /// <summary>
-        /// Sent bytes count.
-        /// </summary>
-        private string bytesSent;
-
-        /// <summary>
-        /// VPN connection status.
-        /// </summary>
-        private string status;
-
-        /// <summary>
-        /// Remaining traffic response.
-        /// </summary>
-        private string remainingTrafficResponse;
-
-        /// <summary>
-        /// Error visibility flag.
-        /// </summary>
-        private bool isErrorVisible;
-
-        /// <summary>
-        /// Connect button visibility flag.
-        /// </summary>
-        private bool isConnectButtonVisible;
-
-        /// <summary>
-        /// Disconnect button visibility flag.
-        /// </summary>
-        private bool isDisconnectButtonVisible;
-
-        /// <summary>
-        /// Use GitHyb authorization flag.
-        /// </summary>
-        private bool useGithubAuthorization;
-
-        /// <summary>
-        /// Connect command.
-        /// </summary>
+        private static readonly string MachineId = RegistryHelper.GetMachineGuid();
         private ICommand connectCommand;
-
-        /// <summary>
-        /// Disconnect command.
-        /// </summary>
         private ICommand disconnectCommand;
-
-        /// <summary>
-        /// Clear log command.
-        /// </summary>
         private ICommand clearLogCommand;
-
-        /// <summary>
-        /// Timer to update remaining traffic information.
-        /// </summary>
-        private DispatcherTimer dispatcherTimer;
-
-        /// <summary>
-        /// Use service flag.
-        /// </summary>
-        private bool useService = true;
-
-        /// <summary>
-        /// Name of windows service to use to establish VPN connection.
-        /// </summary>
-        private string serviceName = "CakeTube Demo Vpn Service";
-
-        /// <summary>
-        /// Log contents.
-        /// </summary>
-        private string logContents;
-
-        /// <summary>
-        /// Countries list.
-        /// </summary>
-        private IEnumerable<string> countriesList;
-
-        /// <summary>
-        /// Login command.
-        /// </summary>
         private ICommand loginCommand;
-
-        /// <summary>
-        /// Logout command
-        /// </summary>
         private ICommand logoutCommand;
-
-        /// <summary>
-        /// Login button visibility flag.
-        /// </summary>
-        private bool isLoginButtonVisible;
-
-        /// <summary>
-        /// Logout button visibility flag.
-        /// </summary>
-        private bool isLogoutButtonVisible;
-
-        /// <summary>
-        /// Logged in flag.
-        /// </summary>
-        private bool isLoggedIn;
-
-        /// <summary>
-        /// GitHub login.
-        /// </summary>
+        private IBackendService vpnServerService;
+        private IReadOnlyCollection<VpnNodeModel> nodes;
+        private VpnNodeModel selectedNodeModel;
+        private VpnConnectionService vpnConnectionService;
+        private VpnWindowsServiceHandler vpnWindowsServiceHandler;
+        private DispatcherTimer dispatcherTimer;
+        private string deviceId;
+        private string carrierId;
+        private string backendAddress;
+        private string errorText;
+        private string accessToken;
+        private string password;
+        private string vpnIpServerServer;
+        private string vpnIp;
+        private string bytesReceived;
+        private string bytesSent;
+        private string status;
+        private string remainingTrafficResponse;
         private string gitHubLogin;
-
-        /// <summary>
-        /// GitHub password.
-        /// </summary>
         private string gitHubPassword;
-
-        /// <summary>
-        /// Reconnect on wake up event.
-        /// </summary>
+        private string serviceName = "CakeTube Demo Vpn Service";
+        private string logContents;
+        private bool isErrorVisible;
+        private bool isConnectButtonVisible;
+        private bool isDisconnectButtonVisible;
+        private bool useGithubAuthorization;
+        private bool isLoginButtonVisible;
+        private bool isLogoutButtonVisible;
+        private bool isLoggedIn;
+        private bool useService = true;
         private bool reconnectOnWakeUp = true;
-
-        /// <summary>
-        /// Reconnect on wake up event.
-        /// </summary>
         private bool isCountryDropdownAvailable;
 
         /// <summary>
-        /// <see cref="MainScreenViewModel"/> static constructor. Performs <see cref="MachineId"/> initialization.
+        /// Initializes static members of the <see cref="MainScreenViewModel"/> class.
         /// </summary>
         static MainScreenViewModel()
         {
-            MachineId = RegistryHelper.GetMachineGuid();
         }
 
         /// <summary>
-        /// <see cref="MainScreenViewModel"/> default constructor.
+        /// Initializes a new instance of the <see cref="MainScreenViewModel"/> class.
         /// </summary>
         public MainScreenViewModel()
         {
@@ -231,7 +89,7 @@
             var dateTime = DateTime.Now;
             this.DeviceId = $"{MachineId}-{dateTime:dd-MM-yy}";
             this.CarrierId = "afdemo";
-            this.BackendUrl = "https://backend.northghost.com";
+            this.BackendAddress = "https://backend.northghost.com";
             this.IsConnectButtonVisible = false;
             this.SetStatusDisconnected();
             this.SetStatusLoggedOut();
@@ -240,13 +98,28 @@
             this.InitializeTimer();
 
             this.IsLoggingEnabled = CakeTubeLogger.IsEnabled;
-
-            // Init predefined carriers and countries            
-            this.InitializeCountriesList();
         }
 
         /// <summary>
-        /// Device id for backend login method.
+        /// Gets or sets the nodes collection.
+        /// </summary>
+        public IReadOnlyCollection<VpnNodeModel> Nodes
+        {
+            get => this.nodes;
+            set => this.SetProperty(ref this.nodes, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the selected selectedNodeModel.
+        /// </summary>
+        public VpnNodeModel SelectedNodeModel
+        {
+            get => this.selectedNodeModel;
+            set => this.SetProperty(ref this.selectedNodeModel, value);
+        }
+
+        /// <summary>
+        /// Gets or sets device id for backend login method.
         /// </summary>
         public string DeviceId
         {
@@ -255,7 +128,7 @@
         }
 
         /// <summary>
-        /// Carrier id for backend service.
+        /// Gets or sets carrier id for backend service.
         /// </summary>
         public string CarrierId
         {
@@ -264,16 +137,16 @@
         }
 
         /// <summary>
-        /// Backend url for backend service.
+        /// Gets or sets backend url address for backend service.
         /// </summary>
-        public string BackendUrl
+        public string BackendAddress
         {
-            get => this.backendUrl;
-            set => this.SetProperty(ref this.backendUrl, value);
+            get => this.backendAddress;
+            set => this.SetProperty(ref this.backendAddress, value);
         }
 
         /// <summary>
-        /// Message which is displayed in case of errors.
+        /// Gets or sets message which is displayed in case of errors.
         /// </summary>
         public string ErrorText
         {
@@ -282,7 +155,7 @@
         }
 
         /// <summary>
-        /// Access token for backend methods.
+        /// Gets or sets access token for backend methods.
         /// </summary>
         public string AccessToken
         {
@@ -291,7 +164,7 @@
         }
 
         /// <summary>
-        /// User password for VPN.
+        /// Gets or sets user password for VPN.
         /// </summary>
         public string Password
         {
@@ -300,7 +173,7 @@
         }
 
         /// <summary>
-        /// VPN service IP address.
+        /// Gets or sets vPN service IP address.
         /// </summary>
         public string VpnIpServer
         {
@@ -309,7 +182,7 @@
         }
 
         /// <summary>
-        /// VPN service IP address.
+        /// Gets or sets vPN service IP address.
         /// </summary>
         public string VpnIp
         {
@@ -318,7 +191,7 @@
         }
 
         /// <summary>
-        /// Remaining traffic response.
+        /// Gets or sets remaining traffic response.
         /// </summary>
         public string RemainingTrafficResponse
         {
@@ -327,7 +200,7 @@
         }
 
         /// <summary>
-        /// Error visibility flag.
+        /// Gets or sets a value indicating whether error visibility flag.
         /// </summary>
         public bool IsErrorVisible
         {
@@ -336,7 +209,7 @@
         }
 
         /// <summary>
-        /// Connect button visibility flag.
+        /// Gets or sets a value indicating whether connect button visibility flag.
         /// </summary>
         public bool IsConnectButtonVisible
         {
@@ -345,7 +218,7 @@
         }
 
         /// <summary>
-        /// Disconnect button visibility flag.
+        /// Gets or sets a value indicating whether disconnect button visibility flag.
         /// </summary>
         public bool IsDisconnectButtonVisible
         {
@@ -354,7 +227,7 @@
         }
 
         /// <summary>
-        /// Received bytes count.
+        /// Gets or sets received bytes count.
         /// </summary>
         public string BytesReceived
         {
@@ -363,7 +236,7 @@
         }
 
         /// <summary>
-        /// Sent bytes count.
+        /// Gets or sets sent bytes count.
         /// </summary>
         public string BytesSent
         {
@@ -372,7 +245,7 @@
         }
 
         /// <summary>
-        /// VPN connection status.
+        /// Gets or sets vPN connection status.
         /// </summary>
         public string Status
         {
@@ -381,16 +254,7 @@
         }
 
         /// <summary>
-        /// Country for backend get credentials method.
-        /// </summary>
-        public string Country
-        {
-            get => this.country;
-            set => this.SetProperty(ref this.country, value);
-        }
-
-        /// <summary>
-        /// Use service flag.
+        /// Gets or sets a value indicating whether use service flag.
         /// </summary>
         public bool UseService
         {
@@ -399,7 +263,7 @@
         }
 
         /// <summary>
-        /// Name of windows service to use to establish VPN connection.
+        /// Gets or sets name of windows service to use to establish VPN connection.
         /// </summary>
         public string ServiceName
         {
@@ -408,7 +272,7 @@
         }
 
         /// <summary>
-        /// Logging enabled flag.
+        /// Gets or sets a value indicating whether logging enabled flag.
         /// </summary>
         public bool IsLoggingEnabled
         {
@@ -424,12 +288,12 @@
                 else
                 {
                     CakeTubeLogger.RemoveAllHandlers<EventLoggerListener>();
-                }                                
+                }
             }
         }
 
         /// <summary>
-        /// Log contents.
+        /// Gets or sets log contents.
         /// </summary>
         public string LogContents
         {
@@ -438,16 +302,7 @@
         }
 
         /// <summary>
-        /// Countries list.
-        /// </summary>
-        public IEnumerable<string> CountriesList
-        {
-            get => this.countriesList;
-            set => this.SetProperty(ref this.countriesList, value);
-        }
-
-        /// <summary>
-        /// Login button visibility flag.
+        /// Gets or sets a value indicating whether login button visibility flag.
         /// </summary>
         public bool IsLoginButtonVisible
         {
@@ -456,7 +311,7 @@
         }
 
         /// <summary>
-        /// Logout button visibility flag.
+        /// Gets or sets a value indicating whether logout button visibility flag.
         /// </summary>
         public bool IsLogoutButtonVisible
         {
@@ -465,7 +320,7 @@
         }
 
         /// <summary>
-        /// Use GitHyb authorization flag.
+        /// Gets or sets a value indicating whether use GitHyb authorization flag.
         /// </summary>
         public bool UseGithubAuthorization
         {
@@ -474,7 +329,7 @@
         }
 
         /// <summary>
-        /// Logged in flag.
+        /// Gets or sets a value indicating whether logged in flag.
         /// </summary>
         public bool IsLoggedIn
         {
@@ -487,12 +342,12 @@
         }
 
         /// <summary>
-        /// Logged out flag.
+        /// Gets a value indicating whether logged out flag.
         /// </summary>
         public bool IsLoggedOut => !this.isLoggedIn;
 
         /// <summary>
-        /// GitHub login.
+        /// Gets or sets gitHub login.
         /// </summary>
         public string GitHubLogin
         {
@@ -501,7 +356,7 @@
         }
 
         /// <summary>
-        /// GitHub password.
+        /// Gets or sets gitHub password.
         /// </summary>
         public string GitHubPassword
         {
@@ -510,7 +365,7 @@
         }
 
         /// <summary>
-        /// Reconnect on wake up event.
+        /// Gets or sets a value indicating whether reconnect on wake up event.
         /// </summary>
         public bool ReconnectOnWakeUp
         {
@@ -519,7 +374,7 @@
         }
 
         /// <summary>
-        /// Is CountryDropdown available.
+        /// Gets or sets a value indicating whether is CountryDropdown available.
         /// </summary>
         public bool IsCountryDropdownAvailable
         {
@@ -528,31 +383,31 @@
         }
 
         /// <summary>
-        /// Connect command.
+        /// Gets connect command.
         /// </summary>
         public ICommand ConnectCommand => this.connectCommand ?? (this.connectCommand = new DelegateCommand(this.Connect));
 
         /// <summary>
-        /// Disconnect command.
+        /// Gets disconnect command.
         /// </summary>
         public ICommand DisconnectCommand => this.disconnectCommand ?? (this.disconnectCommand = new DelegateCommand(this.Disconnect));
 
         /// <summary>
-        /// Clear log command.
+        /// Gets clear log command.
         /// </summary>
         public ICommand ClearLogCommand => this.clearLogCommand ??
                                            (this.clearLogCommand = new DelegateCommand(this.ClearLog));
 
         /// <summary>
-        /// Login command.
+        /// Gets login command.
         /// </summary>
         public ICommand LoginCommand => this.loginCommand ?? (this.loginCommand = new DelegateCommand<object>(this.Login));
 
         /// <summary>
-        /// Logout command.
+        /// Gets logout command.
         /// </summary>
         public ICommand LogoutCommand => this.logoutCommand ?? (this.logoutCommand = new DelegateCommand(this.Logout));
-        
+
         /// <summary>
         /// Performs login to the backend server.
         /// </summary>
@@ -565,7 +420,7 @@
                 this.IsLoginButtonVisible = false;
 
                 // Perform logout
-                await LogoutHelper.Logout();
+                await LogoutHelper.Logout().ConfigureAwait(false);
 
                 // Bootstrap VPN
                 this.BootstrapVpn();
@@ -576,27 +431,26 @@
                 var isGithub = this.UseGithubAuthorization;
 
                 var vpnAuthenticationMethod = isGithub
-                            ? VpnAuthenticationMethod.GitHub
-                            : VpnAuthenticationMethod.Anonymous;
+                            ? AuthenticationMethod.GitHub
+                            : AuthenticationMethod.Anonymous;
 
-                var authAccessToken = isGithub ? await GitHubHelper.GetGithubOAuthToken(this.GitHubLogin, passwordBoxValue) : string.Empty;
+                var authAccessToken = isGithub ? await GitHubHelper.GetGithubOAuthToken(this.GitHubLogin, passwordBoxValue).ConfigureAwait(false) : string.Empty;
 
                 if (isGithub && string.IsNullOrEmpty(authAccessToken))
                 {
-                    MessageBox.Show("Could not perform GitHub authorization!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Could not perform GitHub authorization!", Resources_Logs.Error, MessageBoxButton.OK, MessageBoxImage.Error);
                     this.IsLoginButtonVisible = true;
                     return;
                 }
 
                 // Perform login
-                var loginResponse = await this.vpnServerService.LoginAsync(
-                                        new VpnLoginParams
-                                            {
-                                                AuthenticationMethod = vpnAuthenticationMethod,
-                                                DeviceId = this.DeviceId,                                                
-                                                OAuthAccessToken = authAccessToken,
-                                                DeviceName = Environment.MachineName
-                                            });
+                var loginParams = new LoginParams(
+                    this.CarrierId,
+                    this.DeviceId,
+                    Environment.MachineName,
+                    vpnAuthenticationMethod,
+                    authAccessToken);
+                var loginResponse = await this.vpnServerService.LoginAsync(loginParams).ConfigureAwait(false);
 
                 // Check whether login was successful
                 if (!loginResponse.IsSuccess)
@@ -609,6 +463,7 @@
 
                 // Remember access token for later usages
                 LogoutHelper.AccessToken = loginResponse.AccessToken;
+                LogoutHelper.BackendUrl = this.BackendAddress;
                 this.AccessToken = loginResponse.AccessToken;
 
                 this.UpdateCountries();
@@ -617,7 +472,7 @@
                 this.SetStatusLoggedIn();
 
                 // Update remaining traffic
-                await this.UpdateRemainingTraffic();
+                await this.UpdateRemainingTraffic().ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -636,12 +491,9 @@
             try
             {
                 // Get available countries
-                var countriesResponse = await this.vpnServerService.GetCountriesAsync(
-                                            new GetCountriesParams
-                                                {
-                                                    AccessToken = this.AccessToken,
-                                                    Type = VpnProtocolType.OpenVpnUdp
-                                                });
+                var carrier = new Carrier(this.CarrierId, string.Empty, this.AccessToken);
+                var nodesParams = new NodesParams(carrier, ProtocolType.OpenVpnUdp);
+                var countriesResponse = await this.vpnServerService.NodesAsync(nodesParams).ConfigureAwait(false);
 
                 // Check whether request was successful
                 if (!countriesResponse.IsSuccess)
@@ -653,11 +505,10 @@
                 }
 
                 // Get countries from response
-                var countries = countriesResponse.VpnCountries.Select(x => x.Country).ToList();
-                countries.Insert(0, string.Empty);
+                var countries = countriesResponse.VpnNodes.Select(VpnCountriesParser.ToVpnNodeModel).ToList();
 
                 // Remember countries
-                this.CountriesList = countries;
+                this.Nodes = countries;
             }
             catch (Exception e)
             {
@@ -678,8 +529,9 @@
                 this.IsLoggedIn = false;
 
                 // Perform logout
+                var logoutParams = new LogoutParams(this.AccessToken);
                 var logoutResponse =
-                    await this.vpnServerService.LogoutAsync(new LogoutRequestParams { AccessToken = this.AccessToken });
+                    await this.vpnServerService.LogoutAsync(logoutParams).ConfigureAwait(false);
 
                 // Check whether logout was successful
                 if (!logoutResponse.IsSuccess)
@@ -696,9 +548,9 @@
                 this.VpnIp = string.Empty;
                 this.Password = string.Empty;
                 this.RemainingTrafficResponse = string.Empty;
+                this.SelectedNodeModel = null;
 
                 // Work with UI
-                this.InitializeCountriesList();
                 this.SetStatusLoggedOut();
             }
             catch (Exception e)
@@ -708,7 +560,7 @@
                 this.ErrorText = e.Message;
                 this.IsLoggedIn = true;
                 this.IsCountryDropdownAvailable = true;
-                this.IsLogoutButtonVisible = true;                
+                this.IsLogoutButtonVisible = true;
             }
         }
 
@@ -741,8 +593,8 @@
 
         private void VpnConnectionServiceOnVpnTrafficChanged(VpnTraffic vpnTraffic)
         {
-            this.BytesReceived = vpnTraffic.InBytes.ToString();
-            this.BytesSent = vpnTraffic.OutBytes.ToString();
+            this.BytesReceived = vpnTraffic.InBytes.ToString(CultureInfo.InvariantCulture);
+            this.BytesSent = vpnTraffic.OutBytes.ToString(CultureInfo.InvariantCulture);
         }
 
         private void VpnConnectionServiceOnVpnStateChanged(VpnConnectionState vpnConnectionState)
@@ -756,11 +608,11 @@
                 case VpnConnectionState.Disconnecting:
                     this.SetStatusInProgress();
                     break;
-                case VpnConnectionState.Connected:                    
-                    this.VpnClientOnConnected();                    
+                case VpnConnectionState.Connected:
+                    this.VpnClientOnConnected();
                     break;
                 case VpnConnectionState.Connecting:
-                   this.SetStatusInProgress();
+                    this.SetStatusInProgress();
                     break;
             }
         }
@@ -784,7 +636,7 @@
         }
 
         /// <summary>
-        /// Performs actions related to setting backend status to "Logged out"
+        /// Performs actions related to setting backend status to "Logged out".
         /// </summary>
         private void SetStatusLoggedOut()
         {
@@ -795,7 +647,7 @@
         }
 
         /// <summary>
-        /// Performs actions related to setting backend status to "Logged in"
+        /// Performs actions related to setting backend status to "Logged in".
         /// </summary>
         private void SetStatusLoggedIn()
         {
@@ -824,9 +676,9 @@
         /// </summary>
         private void BootstrapVpn()
         {
-            CakeTube.Initialize(this.ServiceName, this.CarrierId, this.BackendUrl);
-            
-            this.vpnServerService = CakeTube.VpnServerService;
+            CakeTube.Initialize(this.ServiceName, this.CarrierId, this.BackendAddress);
+
+            this.vpnServerService = new BackendService(new Uri(this.BackendAddress));
             this.vpnConnectionService = CakeTube.VpnConnectionService;
             this.vpnWindowsServiceHandler = CakeTube.VpnWindowsServiceHandler;
 
@@ -846,28 +698,31 @@
         private async void Connect()
         {
             try
-            {               
+            {
                 this.IsConnectButtonVisible = false;
                 this.IsDisconnectButtonVisible = false;
                 this.IsLoginButtonVisible = false;
                 this.IsCountryDropdownAvailable = false;
-                var credentialsParams = new GetCredentialsParams
-                            {
-                                AccessToken = this.AccessToken,
-                                VpnType = VpnProtocolType.OpenVpnUdp,
-                                WithCertificate = false,
-                                CountryCode = this.Country
-                            };
+                var credentialsParams = new CredentialsParams(this.AccessToken, ProtocolType.OpenVpnUdp)
+                {
+                    WithCertificate = false,
+                    Country = this.SelectedNodeModel.ServerModel.ServerRepresentation,
+                };
 
-                var connectionResult = await this.Connect(credentialsParams);                
+                var connectionResult = await this.Connect(credentialsParams).ConfigureAwait(false);
 
                 if (connectionResult)
                 {
                     return;
                 }
 
-                credentialsParams.VpnType = VpnProtocolType.OpenVpnTcp;
-                await this.Connect(credentialsParams);                
+                credentialsParams = new CredentialsParams(this.AccessToken, ProtocolType.OpenVpnTcp)
+                {
+                    WithCertificate = false,
+                    Country = this.SelectedNodeModel.ServerModel.ServerRepresentation,
+                };
+
+                await this.Connect(credentialsParams).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -881,27 +736,17 @@
             }
         }
 
-        private async Task<bool> Connect(GetCredentialsParams credentialsParams)
+        private async Task<bool> Connect(CredentialsParams credentialsParams)
         {
-            var vpnCredentialsResponse = await this.vpnServerService.GetCredentialsAsync(credentialsParams);
+            var vpnCredentialsResponse = await this.vpnServerService.CredentialsAsync(credentialsParams).ConfigureAwait(false);
 
             if (!vpnCredentialsResponse.IsSuccess)
             {
-                throw new Exception(vpnCredentialsResponse.Error);
+                throw new InvalidOperationException(vpnCredentialsResponse.Error);
             }
 
-            var vpnCredentials = vpnCredentialsResponse.VpnCredentials;
-
-            return await this.vpnConnectionService.ConnectAsync(
-                                       new VpnCredentials
-                                           {
-                                               Country = this.Country ?? string.Empty,
-                                               Password = vpnCredentials.Password,
-                                               Ip = vpnCredentials.Ip,
-                                               Port = vpnCredentials.Port,
-                                               Protocol = vpnCredentials.Protocol,
-                                               UserName = vpnCredentials.UserName
-                                           });
+            var connectResponse = await this.vpnConnectionService.ConnectAsync(vpnCredentialsResponse).ConfigureAwait(false);
+            return connectResponse;
         }
 
         /// <summary>
@@ -912,7 +757,7 @@
             try
             {
                 // Disconnect VPN
-                await this.vpnConnectionService.Disconnect();                
+                await this.vpnConnectionService.Disconnect().ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -937,11 +782,11 @@
             }
 
             // Update remaining traffic
-            await this.UpdateRemainingTraffic();
+            await this.UpdateRemainingTraffic().ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Performs update of remaining traffic
+        /// Performs update of remaining traffic.
         /// </summary>
         private async Task UpdateRemainingTraffic()
         {
@@ -954,9 +799,9 @@
                 }
 
                 // Get remaining traffic
+                var remainingTrafficParams = new RemainingTrafficParams(this.AccessToken);
                 var remainingTrafficResponseResult =
-                    await this.vpnServerService.GetRemainingTrafficAsync(
-                        new GetRemaningTrafficParams { AccessToken = this.AccessToken });
+                    await this.vpnServerService.RemainingTrafficAsync(remainingTrafficParams).ConfigureAwait(false);
 
                 // Check whether request was successful
                 if (!remainingTrafficResponseResult.IsSuccess)
@@ -972,6 +817,7 @@
             }
             catch (Exception e)
             {
+                CakeTubeLogger.Trace(e.Message);
             }
         }
 
@@ -987,14 +833,6 @@
             }
 
             this.LogContents += logEntry + Environment.NewLine;
-        }
-
-        /// <summary>
-        /// Performs countries list initialization.
-        /// </summary>
-        private void InitializeCountriesList()
-        {
-            this.CountriesList = new[] { string.Empty, };
         }
     }
 }

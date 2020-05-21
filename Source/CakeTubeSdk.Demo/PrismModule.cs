@@ -1,11 +1,12 @@
-﻿namespace CakeTubeSdk.Demo
+﻿// <copyright file="PrismModule.cs" company="AnchorFree Inc.">
+// Copyright (c) AnchorFree Inc. All rights reserved.
+// </copyright>
+// <summary>Describes a Prism Module.</summary>
+
+namespace CakeTubeSdk.Demo
 {
-    using CakeTubeSdk.Core.Services;
     using CakeTubeSdk.Demo.Control;
-    using CakeTubeSdk.Windows;
-
     using Microsoft.Practices.Unity;
-
     using Prism.Modularity;
     using Prism.Regions;
 
@@ -25,7 +26,7 @@
         private readonly IUnityContainer unityContainer;
 
         /// <summary>
-        /// <see cref="PrismModule"/> constructor.
+        /// Initializes a new instance of the <see cref="PrismModule"/> class.
         /// </summary>
         /// <param name="regionManager">PRISM region manager.</param>
         /// <param name="unityContainer">Unity DI container.</param>

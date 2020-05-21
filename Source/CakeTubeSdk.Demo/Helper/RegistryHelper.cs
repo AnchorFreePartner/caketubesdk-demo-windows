@@ -1,4 +1,9 @@
-﻿namespace CakeTubeSdk.Demo.Helper
+﻿// <copyright file="RegistryHelper.cs" company="AnchorFree Inc.">
+// Copyright (c) AnchorFree Inc. All rights reserved.
+// </copyright>
+// <summary>Describes a Registry Helper.</summary>
+
+namespace CakeTubeSdk.Demo.Helper
 {
     using System;
 
@@ -15,9 +20,13 @@
         /// <returns>Machine GUID.</returns>
         internal static string GetMachineGuid()
         {
-            var localKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32);
-            var openSubKey = localKey.OpenSubKey("SOFTWARE\\Microsoft\\Cryptography");
-            return (string)openSubKey.GetValue("MachineGuid");
+            using (var localKey = RegistryKey.OpenBaseKey(
+                RegistryHive.LocalMachine,
+                Environment.Is64BitOperatingSystem ? RegistryView.Registry64 : RegistryView.Registry32))
+            {
+                var openSubKey = localKey.OpenSubKey("SOFTWARE\\Microsoft\\Cryptography");
+                return (string)openSubKey.GetValue("MachineGuid");
+            }
         }
     }
 }

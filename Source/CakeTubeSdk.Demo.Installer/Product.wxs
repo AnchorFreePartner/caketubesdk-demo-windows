@@ -57,7 +57,6 @@
 
     <DirectoryRef Id="INSTALLLOCATION">
       <Component Id="ApplicationComponent" Guid="3728A452-CA48-4AE9-BE84-ED808806F7E9" KeyPath="yes">
-        <File Source="..\..\bin\$(var.AppPath)\CakeTubeSdk.Core.dll" Checksum="yes" />
         <File Source="..\..\bin\$(var.AppPath)\CakeTubeSdk.Demo.exe" Checksum="yes" />
         <File Source="..\..\bin\$(var.AppPath)\CakeTubeSdk.Demo.exe.config" Checksum="yes" />
         <File Source="..\..\bin\$(var.AppPath)\CakeTubeSdk.Windows.dll" Checksum="yes" />
@@ -68,6 +67,7 @@
         <File Source="..\..\bin\$(var.AppPath)\Prism.dll" Checksum="yes" />        
         <File Source="..\..\bin\$(var.AppPath)\Prism.Unity.Wpf.dll" Checksum="yes" />
         <File Source="..\..\bin\$(var.AppPath)\Prism.Wpf.dll" Checksum="yes" />
+        <File Source="..\..\bin\$(var.AppPath)\PartnerApi.dll" Checksum="yes" />
         <File Source="..\..\bin\$(var.AppPath)\System.Windows.Interactivity.dll" Checksum="yes" />
         <File Id="Newtonsoft.Json.dll_app" Source="..\..\bin\$(var.AppPath)\Newtonsoft.Json.dll" Checksum="yes" />
       </Component>

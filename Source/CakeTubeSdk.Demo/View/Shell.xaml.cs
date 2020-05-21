@@ -1,4 +1,9 @@
-﻿namespace CakeTubeSdk.Demo.View
+﻿// <copyright file="Shell.xaml.cs" company="AnchorFree Inc.">
+// Copyright (c) AnchorFree Inc. All rights reserved.
+// </copyright>
+// <summary>Describes a Main Window behavior.</summary>
+
+namespace CakeTubeSdk.Demo.View
 {
     using System.ComponentModel;
     using System.Diagnostics;
@@ -16,7 +21,7 @@
     public partial class Shell : Window
     {
         /// <summary>
-        /// <see cref="Shell"/> default constructor.
+        /// Initializes a new instance of the <see cref="Shell"/> class.
         /// </summary>
         public Shell()
         {
@@ -27,7 +32,7 @@
         }
 
         /// <summary>
-        /// Shell view model (injected).
+        /// Gets or sets shell view model (injected).
         /// </summary>
         [Dependency]
         public ShellViewModel ShellViewModel
@@ -40,15 +45,23 @@
         /// Actions to perform on main window closing.
         /// </summary>
         protected override async void OnClosing(CancelEventArgs e)
-        {            
+        {
+            if (e == null)
+            {
+                return;
+            }
+
             // Do not close window now
             e.Cancel = true;
 
             // Logout from backend
-            await LogoutHelper.Logout();
+            await LogoutHelper.Logout().ConfigureAwait(false);
 
             // Shutdown application
-            Application.Current.Shutdown();
+            this.Dispatcher.Invoke(() =>
+            {
+                Application.Current.Shutdown();
+            });
         }
     }
 }

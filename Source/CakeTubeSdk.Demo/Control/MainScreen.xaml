@@ -21,7 +21,7 @@
             <converter:CollapsedConverter x:Key="BoolToCollapsed" />
             <converter:InvertCollapsedConverter x:Key="BoolToCollapsedInvert" />
             <BooleanToVisibilityConverter x:Key="BoolToVis" />
-            <converter:InvertBoolean x:Key="InvertBoolean" />
+			<converter:InvertBooleanConverter x:Key="InvertBoolean" />
         </Grid.Resources>
 
         <!--  DEVICE ID  -->
@@ -138,6 +138,17 @@
                         IsEnabled="{Binding IsCountryDropdownAvailable}"
                         ItemsSource="{Binding CountriesList}"
                         Text="{Binding Country}" />
+                    <ComboBox Grid.Column="1" 
+                              IsEditable="False" 
+                              ItemsSource="{Binding Nodes}"
+                              SelectedItem="{Binding SelectedNodeModel, Mode=TwoWay}" 
+                              IsEnabled="{Binding IsCountryDropdownAvailable}">
+	                    <ComboBox.ItemTemplate>
+		                    <DataTemplate>
+			                    <TextBlock Text="{Binding DisplayName}" />
+		                    </DataTemplate>
+	                    </ComboBox.ItemTemplate>
+                    </ComboBox>
                 </Grid>
 
                 <StackPanel Grid.Row="7">

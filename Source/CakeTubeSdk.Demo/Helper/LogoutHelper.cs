@@ -1,21 +1,29 @@
-﻿namespace CakeTubeSdk.Demo.Helper
-{
-    using System.Threading.Tasks;
+﻿// <copyright file="LogoutHelper.cs" company="AnchorFree Inc.">
+// Copyright (c) AnchorFree Inc. All rights reserved.
+// </copyright>
+// <summary>Describes a  Logout Helper.</summary>
 
-    using CakeTubeSdk.Core;
-    using CakeTubeSdk.Core.ApiParameters;
-    using CakeTubeSdk.Core.Services;
-    using CakeTubeSdk.Windows;
+namespace CakeTubeSdk.Demo.Helper
+{
+    using System;
+    using System.Threading.Tasks;
+    using PartnerApi;
+    using PartnerApi.Parameters;
 
     /// <summary>
     /// Logout related properties and methods.
     /// </summary>
-    public static class LogoutHelper
+    internal static class LogoutHelper
     {
         /// <summary>
-        /// Access token to perform logout with.
+        /// Sets access token to perform logout with.
         /// </summary>
         public static string AccessToken { private get; set; }
+
+        /// <summary>
+        /// Sets access token to perform logout with.
+        /// </summary>
+        public static string BackendUrl { private get; set; }
 
         /// <summary>
         /// Performs logout from backend.
@@ -25,10 +33,11 @@
             try
             {
                 // Resolve backend service
-                var partnerBackendService = CakeTube.VpnServerService;
+                var partnerBackendService = new BackendService(new Uri(BackendUrl));
+                var logoutParams = new LogoutParams(AccessToken);
 
                 // Logout from backend
-                await partnerBackendService.LogoutAsync(new LogoutRequestParams { AccessToken = AccessToken });
+                await partnerBackendService.LogoutAsync(logoutParams).ConfigureAwait(false);
             }
             catch
             {

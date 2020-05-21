@@ -1,8 +1,15 @@
-﻿namespace CakeTubeSdk.Demo
+﻿// <copyright file="App.xaml.cs" company="AnchorFree Inc.">
+// Copyright (c) AnchorFree Inc. All rights reserved.
+// </copyright>
+// <summary>Encapsulates a Windows Presentation Foundation (WPF) application.</summary>
+
+namespace CakeTubeSdk.Demo
 {
     using System;
     using System.Windows;
+    using CakeTubeSdk.Demo.Properties;
 
+    /// <inheritdoc />
     public partial class App : Application
     {
         /// <summary>
@@ -13,20 +20,21 @@
         {
             base.OnStartup(e);
 
-            AppDomain.CurrentDomain.UnhandledException += this.UnhandledExceptionHandler;
+            AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
 
             var bootstrapper = new Bootstrapper();
             bootstrapper.Run();
         }
 
-        private void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
+        private static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
         {
-            if (e.ExceptionObject is Exception ex)
+            if (!(e.ExceptionObject is Exception ex))
             {
-                var exceptionType = ex.GetType();
-                MessageBox.Show(ex.ToString(), "Unhandled exception", MessageBoxButton.OK, MessageBoxImage.Error);
-                Environment.Exit(1);
+                return;
             }
+
+            MessageBox.Show(ex.Message, Resources_Logs.UnhandledExceptionError, MessageBoxButton.OK, MessageBoxImage.Error);
+            Environment.Exit(1);
         }
     }
 }
