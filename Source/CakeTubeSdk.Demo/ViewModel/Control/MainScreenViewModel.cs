@@ -14,8 +14,10 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
     using System.Windows.Controls;
     using System.Windows.Input;
     using System.Windows.Threading;
+    using CakeTubeSdk.Demo.Countries;
     using CakeTubeSdk.Demo.Helper;
     using CakeTubeSdk.Demo.Logger;
+    using CakeTubeSdk.Demo.Model;
     using CakeTubeSdk.Demo.Properties;
     using CakeTubeSdk.Windows;
     using CakeTubeSdk.Windows.Infrastructure;
@@ -32,192 +34,44 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
     /// </summary>
     public class MainScreenViewModel : BindableBase
     {
-        /// <summary>
-        /// Machine GUID from registry.
-        /// </summary>
         private static readonly string MachineId = RegistryHelper.GetMachineGuid();
-
-        /// <summary>
-        /// CakeTube VPN server service instance.
-        /// </summary>
         private IBackendService vpnServerService;
-
-        /// <summary>
-        /// CakeTube VPN connection service instance.
-        /// </summary>
         private VpnConnectionService vpnConnectionService;
-
         private VpnWindowsServiceHandler vpnWindowsServiceHandler;
-
-        /// <summary>
-        /// Device id for backend login method.
-        /// </summary>
         private string deviceId;
-
-        /// <summary>
-        /// Carrier id for backend service.
-        /// </summary>
         private string carrierId;
-
-        /// <summary>
-        /// Backend url for backend service.
-        /// </summary>
         private string backendAddress;
-
-        /// <summary>
-        /// Country for backend get credentials method.
-        /// </summary>
-        private string country;
-
-        /// <summary>
-        /// Message which is displayed in case of errors.
-        /// </summary>
         private string errorText;
-
-        /// <summary>
-        /// Access token for backend methods.
-        /// </summary>
         private string accessToken;
-
-        /// <summary>
-        /// User password for VPN.
-        /// </summary>
         private string password;
-
-        /// <summary>
-        /// VPN service IP address.
-        /// </summary>
         private string vpnIpServerServer;
-
-        /// <summary>
-        /// VPN service IP address.
-        /// </summary>
         private string vpnIp;
-
-        /// <summary>
-        /// Received bytes count.
-        /// </summary>
         private string bytesReceived;
-
-        /// <summary>
-        /// Sent bytes count.
-        /// </summary>
         private string bytesSent;
-
-        /// <summary>
-        /// VPN connection status.
-        /// </summary>
         private string status;
-
-        /// <summary>
-        /// Remaining traffic response.
-        /// </summary>
         private string remainingTrafficResponse;
-
-        /// <summary>
-        /// Error visibility flag.
-        /// </summary>
         private bool isErrorVisible;
-
-        /// <summary>
-        /// Connect button visibility flag.
-        /// </summary>
         private bool isConnectButtonVisible;
-
-        /// <summary>
-        /// Disconnect button visibility flag.
-        /// </summary>
         private bool isDisconnectButtonVisible;
-
-        /// <summary>
-        /// Use GitHyb authorization flag.
-        /// </summary>
         private bool useGithubAuthorization;
-
-        /// <summary>
-        /// Connect command.
-        /// </summary>
         private ICommand connectCommand;
-
-        /// <summary>
-        /// Disconnect command.
-        /// </summary>
         private ICommand disconnectCommand;
-
-        /// <summary>
-        /// Clear log command.
-        /// </summary>
         private ICommand clearLogCommand;
-
-        /// <summary>
-        /// Timer to update remaining traffic information.
-        /// </summary>
         private DispatcherTimer dispatcherTimer;
-
-        /// <summary>
-        /// Use service flag.
-        /// </summary>
         private bool useService = true;
-
-        /// <summary>
-        /// Name of windows service to use to establish VPN connection.
-        /// </summary>
         private string serviceName = "CakeTube Demo Vpn Service";
-
-        /// <summary>
-        /// Log contents.
-        /// </summary>
         private string logContents;
-
-        /// <summary>
-        /// Countries list.
-        /// </summary>
-        private IEnumerable<string> countriesList;
-
-        /// <summary>
-        /// Login command.
-        /// </summary>
         private ICommand loginCommand;
-
-        /// <summary>
-        /// Logout command.
-        /// </summary>
         private ICommand logoutCommand;
-
-        /// <summary>
-        /// Login button visibility flag.
-        /// </summary>
         private bool isLoginButtonVisible;
-
-        /// <summary>
-        /// Logout button visibility flag.
-        /// </summary>
         private bool isLogoutButtonVisible;
-
-        /// <summary>
-        /// Logged in flag.
-        /// </summary>
         private bool isLoggedIn;
-
-        /// <summary>
-        /// GitHub login.
-        /// </summary>
         private string gitHubLogin;
-
-        /// <summary>
-        /// GitHub password.
-        /// </summary>
         private string gitHubPassword;
-
-        /// <summary>
-        /// Reconnect on wake up event.
-        /// </summary>
         private bool reconnectOnWakeUp = true;
-
-        /// <summary>
-        /// Reconnect on wake up event.
-        /// </summary>
         private bool isCountryDropdownAvailable;
+        private IReadOnlyCollection<VpnNodeModel> nodes;
+        private VpnNodeModel selectedNodeModel;
 
         /// <summary>
         /// Initializes static members of the <see cref="MainScreenViewModel"/> class.
@@ -244,9 +98,24 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
             this.InitializeTimer();
 
             this.IsLoggingEnabled = CakeTubeLogger.IsEnabled;
+        }
 
-            // Init predefined carriers and countries
-            this.InitializeCountriesList();
+        /// <summary>
+        /// Gets or sets the nodes collection.
+        /// </summary>
+        public IReadOnlyCollection<VpnNodeModel> Nodes
+        {
+            get => this.nodes;
+            set => this.SetProperty(ref this.nodes, value);
+        }
+
+        /// <summary>
+        /// Gets or sets the selected selectedNodeModel.
+        /// </summary>
+        public VpnNodeModel SelectedNodeModel
+        {
+            get => this.selectedNodeModel;
+            set => this.SetProperty(ref this.selectedNodeModel, value);
         }
 
         /// <summary>
@@ -385,15 +254,6 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
         }
 
         /// <summary>
-        /// Gets or sets country for backend get credentials method.
-        /// </summary>
-        public string Country
-        {
-            get => this.country;
-            set => this.SetProperty(ref this.country, value);
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether use service flag.
         /// </summary>
         public bool UseService
@@ -439,15 +299,6 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
         {
             get => this.logContents;
             set => this.SetProperty(ref this.logContents, value);
-        }
-
-        /// <summary>
-        /// Gets or sets countries list.
-        /// </summary>
-        public IEnumerable<string> CountriesList
-        {
-            get => this.countriesList;
-            set => this.SetProperty(ref this.countriesList, value);
         }
 
         /// <summary>
@@ -654,11 +505,10 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
                 }
 
                 // Get countries from response
-                var countries = countriesResponse.VpnCountries.Select(x => x.CountryCode).ToList();
-                countries.Insert(0, string.Empty);
+                var countries = countriesResponse.VpnNodes.Select(VpnCountriesParser.ToVpnNodeModel).ToList();
 
                 // Remember countries
-                this.CountriesList = countries;
+                this.Nodes = countries;
             }
             catch (Exception e)
             {
@@ -700,7 +550,6 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
                 this.RemainingTrafficResponse = string.Empty;
 
                 // Work with UI
-                this.InitializeCountriesList();
                 this.SetStatusLoggedOut();
             }
             catch (Exception e)
@@ -856,7 +705,7 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
                 var credentialsParams = new CredentialsParams(this.AccessToken, ProtocolType.OpenVpnUdp)
                 {
                     WithCertificate = false,
-                    Country = this.Country,
+                    Country = this.SelectedNodeModel.ServerModel.ServerRepresentation,
                 };
 
                 var connectionResult = await this.Connect(credentialsParams).ConfigureAwait(false);
@@ -869,7 +718,7 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
                 credentialsParams = new CredentialsParams(this.AccessToken, ProtocolType.OpenVpnTcp)
                 {
                     WithCertificate = false,
-                    Country = this.Country,
+                    Country = this.SelectedNodeModel.ServerModel.ServerRepresentation,
                 };
 
                 await this.Connect(credentialsParams).ConfigureAwait(false);
@@ -983,14 +832,6 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
             }
 
             this.LogContents += logEntry + Environment.NewLine;
-        }
-
-        /// <summary>
-        /// Performs countries list initialization.
-        /// </summary>
-        private void InitializeCountriesList()
-        {
-            this.CountriesList = new[] { string.Empty, };
         }
     }
 }

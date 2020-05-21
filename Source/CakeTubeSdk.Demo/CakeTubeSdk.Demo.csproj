@@ -112,6 +112,7 @@
     <Compile Include="Converter\InvertBooleanConverter.cs" />
     <Compile Include="Converter\InvertCollapsedConverter.cs" />
     <Compile Include="Converter\InvertVisibilityConverter.cs" />
+    <Compile Include="Countries\VpnCountriesParser.cs" />
     <Compile Include="Helper\GitHubHelper.cs" />
     <Compile Include="Helper\LogoutHelper.cs" />
     <Compile Include="Helper\PasswordHelper.cs" />
@@ -187,5 +188,6 @@
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.1.1.118\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
