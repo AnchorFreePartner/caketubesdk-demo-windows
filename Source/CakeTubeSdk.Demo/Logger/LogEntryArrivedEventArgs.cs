@@ -1,4 +1,9 @@
-﻿namespace CakeTubeSdk.Demo.Logger
+﻿// <copyright file="LogEntryArrivedEventArgs.cs" company="AnchorFree Inc.">
+// Copyright (c) AnchorFree Inc. All rights reserved.
+// </copyright>
+// <summary>Describes a LogEntryArrived EventArgs.</summary>
+
+namespace CakeTubeSdk.Demo.Logger
 {
     using System;
 
@@ -8,7 +13,7 @@
     internal class LogEntryArrivedEventArgs : EventArgs
     {
         /// <summary>
-        /// <see cref="LogEntryArrivedEventArgs"/> constructor.
+        /// Initializes a new instance of the <see cref="LogEntryArrivedEventArgs"/> class.
         /// </summary>
         /// <param name="entry">Log entry message.</param>
         public LogEntryArrivedEventArgs(string entry)
@@ -17,7 +22,7 @@
         }
 
         /// <summary>
-        /// Log entry message.
+        /// Gets log entry message.
         /// </summary>
         public string Entry { get; }
     }

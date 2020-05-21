@@ -1,4 +1,9 @@
-﻿namespace CakeTubeSdk.Demo.Control
+﻿// <copyright file="MainScreen.xaml.cs" company="AnchorFree Inc.">
+// Copyright (c) AnchorFree Inc. All rights reserved.
+// </copyright>
+// <summary>Describes a  Main screen control.</summary>
+
+namespace CakeTubeSdk.Demo.Control
 {
     using System.Windows.Controls;
 
@@ -12,7 +17,7 @@
     public partial class MainScreen : UserControl
     {
         /// <summary>
-        /// <see cref="MainScreen"/> default constructor.
+        /// Initializes a new instance of the <see cref="MainScreen"/> class.
         /// </summary>
         public MainScreen()
         {
@@ -20,7 +25,7 @@
         }
 
         /// <summary>
-        /// Main screen view model (<see cref="MainScreenViewModel"/>, injected).
+        /// Gets or sets main screen view model (<see cref="MainScreenViewModel"/>, injected).
         /// </summary>
         [Dependency]
         public MainScreenViewModel MainScreenViewModel

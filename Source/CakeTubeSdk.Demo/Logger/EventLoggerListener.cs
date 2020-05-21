@@ -1,4 +1,9 @@
-﻿namespace CakeTubeSdk.Demo.Logger
+﻿// <copyright file="EventLoggerListener.cs" company="AnchorFree Inc.">
+// Copyright (c) AnchorFree Inc. All rights reserved.
+// </copyright>
+// <summary>Describes a Event Logger Listener.</summary>
+
+namespace CakeTubeSdk.Demo.Logger
 {
     using System;
     using CakeTubeSdk.Windows.Infrastructure;

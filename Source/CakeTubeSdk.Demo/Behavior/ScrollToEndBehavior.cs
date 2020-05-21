@@ -1,4 +1,9 @@
-﻿namespace CakeTubeSdk.Demo.Behavior
+﻿// <copyright file="ScrollToEndBehavior.cs" company="AnchorFree Inc.">
+// Copyright (c) AnchorFree Inc. All rights reserved.
+// </copyright>
+// <summary>Describes a Scroll Behavior for Text Box.</summary>
+
+namespace CakeTubeSdk.Demo.Behavior
 {
     using System.Windows;
     using System.Windows.Controls;
@@ -25,7 +30,7 @@
         /// <returns>Value of <see cref="AlwaysScrollToEndProperty"/>.</returns>
         public static bool GetAlwaysScrollToEnd(DependencyObject dependencyObject)
         {
-            return (bool) dependencyObject.GetValue(AlwaysScrollToEndProperty);
+            return (bool)dependencyObject.GetValue(AlwaysScrollToEndProperty);
         }
 
         /// <summary>
@@ -49,17 +54,17 @@
             var textBox = dependencyObject as TextBox;
 
             // Get new property value
-            var newValue = (bool) e.NewValue;
+            var newValue = (bool)e.NewValue;
 
             // Check above values for sanity
-            if (textBox == null || (bool) e.OldValue == newValue)
+            if (textBox == null || (bool)e.OldValue == newValue)
             {
                 return;
             }
 
             // Create event handler which scrolls to end event sender
             TextChangedEventHandler handler = (sender, args) =>
-                ((TextBox) sender).ScrollToEnd();
+                ((TextBox)sender).ScrollToEnd();
 
             // If AlwaysScrollToEnd is true - attach handler, otherwise detach handler
             if (newValue)

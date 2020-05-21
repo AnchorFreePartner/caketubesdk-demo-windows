@@ -1,4 +1,9 @@
-﻿namespace CakeTubeSdk.Demo.Helper
+﻿// <copyright file="LogoutHelper.cs" company="AnchorFree Inc.">
+// Copyright (c) AnchorFree Inc. All rights reserved.
+// </copyright>
+// <summary>Describes a  Logout Helper.</summary>
+
+namespace CakeTubeSdk.Demo.Helper
 {
     using System;
     using System.Threading.Tasks;
@@ -8,15 +13,15 @@
     /// <summary>
     /// Logout related properties and methods.
     /// </summary>
-    public static class LogoutHelper
+    internal static class LogoutHelper
     {
         /// <summary>
-        /// Access token to perform logout with.
+        /// Sets access token to perform logout with.
         /// </summary>
         public static string AccessToken { private get; set; }
 
         /// <summary>
-        /// Access token to perform logout with.
+        /// Sets access token to perform logout with.
         /// </summary>
         public static string BackendUrl { private get; set; }
 
@@ -30,8 +35,9 @@
                 // Resolve backend service
                 var partnerBackendService = new BackendService(new Uri(BackendUrl));
                 var logoutParams = new LogoutParams(AccessToken);
+
                 // Logout from backend
-                await partnerBackendService.LogoutAsync(logoutParams);
+                await partnerBackendService.LogoutAsync(logoutParams).ConfigureAwait(false);
             }
             catch
             {
