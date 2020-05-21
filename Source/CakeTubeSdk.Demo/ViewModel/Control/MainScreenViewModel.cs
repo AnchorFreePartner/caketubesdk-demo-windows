@@ -35,9 +35,17 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
     public class MainScreenViewModel : BindableBase
     {
         private static readonly string MachineId = RegistryHelper.GetMachineGuid();
+        private ICommand connectCommand;
+        private ICommand disconnectCommand;
+        private ICommand clearLogCommand;
+        private ICommand loginCommand;
+        private ICommand logoutCommand;
         private IBackendService vpnServerService;
+        private IReadOnlyCollection<VpnNodeModel> nodes;
+        private VpnNodeModel selectedNodeModel;
         private VpnConnectionService vpnConnectionService;
         private VpnWindowsServiceHandler vpnWindowsServiceHandler;
+        private DispatcherTimer dispatcherTimer;
         private string deviceId;
         private string carrierId;
         private string backendAddress;
@@ -50,28 +58,20 @@ namespace CakeTubeSdk.Demo.ViewModel.Control
         private string bytesSent;
         private string status;
         private string remainingTrafficResponse;
+        private string gitHubLogin;
+        private string gitHubPassword;
+        private string serviceName = "CakeTube Demo Vpn Service";
+        private string logContents;
         private bool isErrorVisible;
         private bool isConnectButtonVisible;
         private bool isDisconnectButtonVisible;
         private bool useGithubAuthorization;
-        private ICommand connectCommand;
-        private ICommand disconnectCommand;
-        private ICommand clearLogCommand;
-        private DispatcherTimer dispatcherTimer;
-        private bool useService = true;
-        private string serviceName = "CakeTube Demo Vpn Service";
-        private string logContents;
-        private ICommand loginCommand;
-        private ICommand logoutCommand;
         private bool isLoginButtonVisible;
         private bool isLogoutButtonVisible;
         private bool isLoggedIn;
-        private string gitHubLogin;
-        private string gitHubPassword;
+        private bool useService = true;
         private bool reconnectOnWakeUp = true;
         private bool isCountryDropdownAvailable;
-        private IReadOnlyCollection<VpnNodeModel> nodes;
-        private VpnNodeModel selectedNodeModel;
 
         /// <summary>
         /// Initializes static members of the <see cref="MainScreenViewModel"/> class.
